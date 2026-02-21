@@ -7,3 +7,4 @@ fpdf
 docker
 flask
 prometheus_client
+python-dotenv

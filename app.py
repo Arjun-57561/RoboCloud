@@ -1,5 +1,11 @@
 import streamlit as st
 import requests, json, time
+import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+
 from crew import run_incident_response
 
 st.set_page_config(page_title="🛡️ SRE Agent", layout="wide")

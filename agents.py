@@ -1,7 +1,15 @@
 import os
+from dotenv import load_dotenv
 from crewai import Agent
 from langchain_groq import ChatGroq
 from tools import query_prometheus, query_logs, get_health_summary, execute_fix
+
+# Load environment variables
+load_dotenv()
+
+# Set a dummy OpenAI key if not present (CrewAI requires it even when using other providers)
+if not os.getenv("OPENAI_API_KEY"):
+    os.environ["OPENAI_API_KEY"] = "sk-dummy-key-not-used"
 
 llm = ChatGroq(
     model="llama-3.1-8b-instant",
