@@ -1,0 +1,9 @@
+crewai
+langchain-groq
+prometheus-api-client
+requests
+streamlit
+fpdf
+docker
+flask
+prometheus_client

@@ -1,0 +1,34 @@
+name: Memory Leak Remediation
+incident_type: memory_leak
+severity: P1-critical
+
+detection:
+  - metric: app_heap_usage_bytes
+    threshold: "> 200MB (80% of 256MB limit)"
+  - logs: "OOM Warning|Memory allocation surge"
+
+diagnosis:
+  root_cause: "Unbounded memory allocation in application code"
+  indicators:
+    - "Heap usage continuously increasing"
+    - "No garbage collection recovery"
+    - "Specific code path identified in logs"
+
+remediation:
+  steps:
+    - action: "Clear memory caches"
+      command: "kubectl exec -it pod -- curl localhost:8080/inject/clear"
+    - action: "Restart application with increased memory limit"
+      command: "kubectl set resources deployment app --limits=memory=512Mi"
+    - action: "Scale to 3 replicas for load distribution"
+      command: "kubectl scale deployment app --replicas=3"
+
+verification:
+  - "Heap usage returns to < 100MB"
+  - "No OOM errors in logs for 5 minutes"
+  - "Application responding normally"
+
+prevention:
+  - "Add memory profiling to CI/CD"
+  - "Implement circuit breakers for resource-intensive operations"
+  - "Set up proactive alerts at 60% memory usage"

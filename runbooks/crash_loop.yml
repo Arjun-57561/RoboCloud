@@ -1,0 +1,34 @@
+name: Crash Loop Remediation
+incident_type: crash_loop
+severity: P1-critical
+
+detection:
+  - metric: app_restart_total
+    threshold: "> 3 restarts in 2 minutes"
+  - logs: "CrashLoopBackOff|exit code 137"
+
+diagnosis:
+  root_cause: "Application failing health checks or OOM killed"
+  indicators:
+    - "Rapid restart cycles"
+    - "Exit code 137 (SIGKILL)"
+    - "Health check failures"
+
+remediation:
+  steps:
+    - action: "Stop crash loop cycle"
+      command: "kubectl delete pod app-xxx --grace-period=0"
+    - action: "Reset health checks"
+      command: "kubectl patch deployment app -p '{\"spec\":{\"template\":{\"spec\":{\"containers\":[{\"name\":\"app\",\"livenessProbe\":null}]}}}}'"
+    - action: "Restart with backoff policy"
+      command: "kubectl rollout restart deployment app"
+
+verification:
+  - "Pod running for > 5 minutes without restart"
+  - "Health checks passing"
+  - "No error logs"
+
+prevention:
+  - "Increase health check timeout and failure threshold"
+  - "Add resource requests/limits"
+  - "Implement graceful shutdown handlers"
