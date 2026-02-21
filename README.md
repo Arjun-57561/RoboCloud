@@ -14,7 +14,7 @@ Production-grade SRE agent that detects, diagnoses, and remediates incidents aut
 ### 1. Install Dependencies
 
 ```bash
-pip install -r requriments.txt
+pip install -r requirements.txt
 ```
 
 ### 2. Start Infrastructure
@@ -64,14 +64,19 @@ See `runbooks/` for YAML-based remediation playbooks.
 
 ## Configuration
 
-Update Groq API key in `agents.py`:
+1. Copy the example environment file:
 
-```python
-llm = ChatGroq(
-    model="llama-3.1-70b-versatile",
-    api_key="YOUR_KEY_HERE"
-)
+```bash
+copy .env.example .env
 ```
+
+2. Edit `.env` and add your Groq API key:
+
+```
+GROQ_API_KEY=your_actual_groq_api_key_here
+```
+
+The application will automatically load the API key from the `.env` file.
 
 ## Metrics
 
