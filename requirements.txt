@@ -8,3 +8,6 @@ docker
 flask
 prometheus_client
 python-dotenv
+fastapi
+uvicorn[standard]
+pydantic

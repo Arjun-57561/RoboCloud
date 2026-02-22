@@ -6,27 +6,27 @@ def run_incident_response():
     timestamp = datetime.datetime.now().isoformat()
     
     detect_task = Task(
-        description=f"[{timestamp}] Scan all metrics and logs. Report any anomalies with exact values.",
+        description=f"[{timestamp}] Scan Prometheus metrics and Loki logs. Identify anomalies with exact values and thresholds crossed. Provide a short justification for why each is anomalous.",
         agent=detector,
-        expected_output="Anomaly report with metric values and log entries"
+        expected_output="Anomaly report with metric values, thresholds, and log excerpts with brief justifications"
     )
     
     diagnose_task = Task(
-        description="Analyze the detected anomalies. Determine incident type, root cause, severity, and blast radius.",
+        description="Analyze anomalies to determine incident_type (memory_leak|crash_loop|db_saturation), probable root cause, severity (P1-P3), and blast radius. Explain your reasoning briefly.",
         agent=diagnoser,
-        expected_output="Root cause analysis with incident_type, cause, severity",
+        expected_output="Root cause analysis with incident_type, cause, severity, and concise reasoning",
         context=[detect_task]
     )
     
     fix_task = Task(
-        description="Execute the appropriate remediation based on diagnosis. Verify fix by checking metrics after.",
+        description="Select the correct runbook and execute remediation. After actions, re-check metrics to verify recovery. Justify each action taken.",
         agent=actor,
-        expected_output="Remediation result with verification",
+        expected_output="Remediation actions executed with verification metrics and short justifications",
         context=[diagnose_task]
     )
     
     report_task = Task(
-        description="Write a complete incident report covering detection, diagnosis, remediation, and prevention.",
+        description="Write a complete timestamped incident report covering detection, diagnosis, remediation (with actions and justifications), verification, and prevention recommendations.",
         agent=reporter,
         expected_output="Markdown incident report",
         context=[detect_task, diagnose_task, fix_task]
@@ -40,6 +40,14 @@ def run_incident_response():
     )
     
     result = crew.kickoff()
+    safe_ts = timestamp.replace(':', '-')
+    try:
+        import os
+        os.makedirs('reports', exist_ok=True)
+        with open(f'reports/incident-{safe_ts}.md', 'w', encoding='utf-8') as f:
+            f.write(str(result))
+    except Exception:
+        pass
     return result
 
 if __name__ == "__main__":

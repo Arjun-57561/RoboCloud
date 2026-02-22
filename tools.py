@@ -1,9 +1,9 @@
-import requests, subprocess, json, logging
+import requests, subprocess, json, logging, os
 from crewai.tools import tool
 
-PROM_URL = "http://localhost:9090"
-LOKI_URL = "http://localhost:3100"
-APP_URL = "http://localhost:8080"
+PROM_URL = os.getenv("PROMETHEUS_URL", "http://localhost:9090")
+LOKI_URL = os.getenv("LOKI_URL", "http://localhost:3100")
+APP_URL = os.getenv("APP_URL", "http://localhost:8080")
 
 @tool("Query Prometheus Metrics")
 def query_prometheus(query: str) -> str:
@@ -41,10 +41,10 @@ def query_logs(search_term: str) -> str:
 
 @tool("Get System Health Summary")
 def get_health_summary(service: str) -> str:
-    """Get a complete health summary of the service including heap, restarts, latency, errors."""
+    """Get a complete health summary of the service including heap, restarts, latency, errors, db connections."""
     try:
         metrics = {}
-        for q in ["app_heap_usage_bytes", "app_restart_total", "app_request_latency_ms", "app_errors_total"]:
+        for q in ["app_heap_usage_bytes", "app_restart_total", "app_request_latency_ms", "app_errors_total", "app_db_connections"]:
             r = requests.get(f"{PROM_URL}/api/v1/query", params={"query": q}, timeout=5)
             data = r.json()
             if data["status"] == "success" and data["data"]["result"]:
@@ -55,7 +55,7 @@ def get_health_summary(service: str) -> str:
 
 @tool("Execute Remediation")
 def execute_fix(incident_type: str) -> str:
-    """Execute remediation for a specific incident type: 'memory_leak' or 'crash_loop'."""
+    """Execute remediation for a specific incident type: 'memory_leak', 'crash_loop', or 'db_saturation'."""
     fixes = {
         "memory_leak": {
             "actions": [
@@ -70,6 +70,14 @@ def execute_fix(incident_type: str) -> str:
                 "Stopping crash loop cycle",
                 "Resetting health checks",
                 "Restarting with backoff policy"
+            ],
+            "command": f"{APP_URL}/inject/clear"
+        },
+        "db_saturation": {
+            "actions": [
+                "Throttle incoming traffic (temporary)",
+                "Increase database pool size",
+                "Purge stale connections and clear waiters"
             ],
             "command": f"{APP_URL}/inject/clear"
         }

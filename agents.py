@@ -7,13 +7,13 @@ from tools import query_prometheus, query_logs, get_health_summary, execute_fix
 # Load environment variables
 load_dotenv()
 
-# Set a dummy OpenAI key if not present (CrewAI requires it even when using other providers)
-if not os.getenv("OPENAI_API_KEY"):
-    os.environ["OPENAI_API_KEY"] = "sk-dummy-key-not-used"
+groq_key = os.getenv("GROQ_API_KEY")
+if not groq_key:
+    raise RuntimeError("GROQ_API_KEY is not set. Add it to backend/.env and restart Streamlit.")
 
 llm = ChatGroq(
-    model="llama-3.3-70b-versatile",
-    api_key=os.getenv("GROQ_API_KEY"),
+    model="qwen/qwen3-32b",
+    api_key=groq_key,
     temperature=0.1
 )
 

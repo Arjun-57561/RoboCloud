@@ -6,6 +6,7 @@ Run this before starting Streamlit.
 
 import requests
 import sys
+import os
 
 def check_service(url, name):
     try:
@@ -25,10 +26,13 @@ def check_service(url, name):
 def main():
     print("🔍 Checking Docker services...\n")
     
+    app_url = os.getenv("APP_URL", "http://localhost:8080")
+    prom_url = os.getenv("PROMETHEUS_URL", "http://localhost:9090")
+    loki_url = os.getenv("LOKI_URL", "http://localhost:3100")
     services = {
-        "Faulty App": "http://localhost:8080/health",
-        "Prometheus": "http://localhost:9090/-/ready",
-        "Loki": "http://localhost:3100/ready"
+        "Faulty App": f"{app_url}/health",
+        "Prometheus": f"{prom_url}/-/ready",
+        "Loki": f"{loki_url}/ready"
     }
     
     results = {}

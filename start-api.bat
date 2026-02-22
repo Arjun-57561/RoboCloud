@@ -1,0 +1,3 @@
+@echo off
+echo Starting FastAPI Backend...
+python api.py
